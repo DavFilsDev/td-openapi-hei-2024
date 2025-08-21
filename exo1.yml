@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: Ping API
+  version: 1.0.0
+  description: A minimal API for testing connectivity
+paths:
+  /ping:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: pong
