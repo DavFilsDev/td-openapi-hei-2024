@@ -1,0 +1,85 @@
+openapi: 3.0.0
+info:
+  title: Product Search API
+  version: 1.0.0
+  description: API for searching products with reusable parameters and examples
+
+paths:
+  /products:
+    get:
+      summary: Search products
+      description: Returns a list of products based on search criteria and pagination
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+              examples:
+                multiple-products:
+                  summary: Example with multiple products
+                  value:
+                    - name: "Organic Apples"
+                      expiration_datetime: "2024-12-31T23:59:59Z"
+                      price: 2.99
+                    - name: "Whole Wheat Bread"
+                      expiration_datetime: "2024-08-28T12:00:00Z"
+                      price: 3.49
+                    - name: "Dairy Milk"
+                      expiration_datetime: "2024-08-25T09:30:00Z"
+                      price: 1.99
+                empty-list:
+                  summary: Example with no results
+                  value: []
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the product
+          example: "Organic Bananas"
+        expiration_datetime:
+          type: string
+          format: date-time
+          description: The expiration date and time of the product
+          example: "2024-12-31T23:59:59Z"
+        price:
+          type: number
+          format: float
+          minimum: 0
+          description: The price of the product in USD
+          example: 1.99
+      required:
+        - name
+        - expiration_datetime
+        - price
+
+  parameters:
+    q:
+      name: q
+      in: query
+      description: Search query term for product names
+      required: false
+      schema:
+        type: string
+      example: "organic"
+    limit:
+      name: limit
+      in: query
+      description: Maximum number of products to return
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      example: 10
