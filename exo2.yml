@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  title: User Management API
+  version: 1.0.0
+  description: API for managing users with query parameters
+paths:
+  /users:
+    get:
+      summary: Get a list of users
+      description: Returns a paginated list of users. Page and size are required query parameters.
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+          description: The page number to retrieve
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          required: true
+          description: The number of users per page
+      responses:
+        '200':
+          description: OK - List of users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+              examples:
+                example-users:
+                  value:
+                    - id: 1
+                      name: Alice
+                      email: alice@example.com
+                    - id: 2
+                      name: Bob
+                      email: bob@example.com
+        '400':
+          description: Bad Request - Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                bad-parameters:
+                  value:
+                    error: "Bad types for provided query parameters"
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The user's unique identifier
+        name:
+          type: string
+          description: The user's full name
+        email:
+          type: string
+          format: email
+          description: The user's email address
+      required:
+        - id
+        - name
+        - email
