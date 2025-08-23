@@ -1,0 +1,340 @@
+openapi: 3.0.0
+info:
+  title: User Profile Management API
+  version: 1.0.0
+  description: API for managing user profiles with decomposed schemas and targeted updates
+
+paths:
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      description: Returns a complete user profile with all information
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User profile found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+              examples:
+                complete-user:
+                  value:
+                    identifier: "USER-001"
+                    first_name: "John"
+                    last_name: "Doe"
+                    birthdate: "1990-05-15"
+                    email: "john.doe@example.com"
+                    address_street: "123 Main St"
+                    address_city: "Antananarivo"
+                    address_country: "Madagascar"
+                    address_postal_code: "101"
+                    needs_newsletter: true
+                    language: "eng"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                user-not-found:
+                  value:
+                    error: "User not found"
+
+  /users:
+    post:
+      tags:
+        - Users
+      summary: Create users
+      description: Create one or more users without providing identifiers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateUserProfile'
+            examples:
+              create-users:
+                value:
+                  - first_name: "Alice"
+                    last_name: "Smith"
+                    birthdate: "1992-08-20"
+                    email: "alice.smith@example.com"
+                    address_street: "456 Oak Ave"
+                    address_city: "Antsirabe"
+                    address_country: "Madagascar"
+                    address_postal_code: "102"
+                    needs_newsletter: false
+                    language: "fr"
+      responses:
+        '201':
+          description: Users created successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserProfile'
+              examples:
+                created-users:
+                  value:
+                    - identifier: "USER-002"
+                      first_name: "Alice"
+                      last_name: "Smith"
+                      birthdate: "1992-08-20"
+                      email: "alice.smith@example.com"
+                      address_street: "456 Oak Ave"
+                      address_city: "Antsirabe"
+                      address_country: "Madagascar"
+                      address_postal_code: "102"
+                      needs_newsletter: false
+                      language: "fr"
+
+  /users/{id}/personalInfo:
+    put:
+      tags:
+        - Users
+      summary: Update personal information
+      description: Update only the personal information of a user
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalInfo'
+            examples:
+              update-personal:
+                value:
+                  first_name: "Marie"
+                  last_name: "Rakoto"
+                  birthdate: "1988-12-03"
+                  email: "marie.rakoto@example.com"
+      responses:
+        '200':
+          description: Personal information updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{id}/address:
+    put:
+      tags:
+        - Users
+      summary: Update address
+      description: Update only the address of a user
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Address'
+            examples:
+              update-address:
+                value:
+                  address_street: "789 Palm Blvd"
+                  address_city: "Toamasina"
+                  address_country: "Madagascar"
+                  address_postal_code: "201"
+      responses:
+        '200':
+          description: Address updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{id}/preferences:
+    put:
+      tags:
+        - Users
+      summary: Update preferences
+      description: Update only the preferences of a user
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Preferences'
+            examples:
+              update-preferences:
+                value:
+                  needs_newsletter: true
+                  language: "mg"
+      responses:
+        '200':
+          description: Preferences updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: The user identifier
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9-]+$'
+      example: "USER-001"
+
+  schemas:
+    UserProfile:
+      type: object
+      properties:
+        identifier:
+          type: string
+          description: The unique user identifier (generated by server)
+          example: "USER-001"
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        birthdate:
+          type: string
+          format: date
+          example: "1990-05-15"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        address_street:
+          type: string
+          example: "123 Main St"
+        address_city:
+          type: string
+          example: "Antananarivo"
+        address_country:
+          type: string
+          example: "Madagascar"
+        address_postal_code:
+          type: string
+          pattern: '^\d+$'
+          example: "101"
+        needs_newsletter:
+          type: boolean
+          example: true
+        language:
+          type: string
+          enum: ["mg", "fr", "eng"]
+          example: "eng"
+      required:
+        - identifier
+        - first_name
+        - last_name
+        - birthdate
+        - email
+        - address_street
+        - address_city
+        - address_country
+        - address_postal_code
+        - needs_newsletter
+        - language
+
+    CreateUserProfile:
+      allOf:
+        - $ref: '#/components/schemas/PersonalInfo'
+        - $ref: '#/components/schemas/Address'
+        - $ref: '#/components/schemas/Preferences'
+
+    PersonalInfo:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        birthdate:
+          type: string
+          format: date
+          example: "1990-05-15"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+      required:
+        - first_name
+        - last_name
+        - birthdate
+        - email
+
+    Address:
+      type: object
+      properties:
+        address_street:
+          type: string
+          example: "123 Main St"
+        address_city:
+          type: string
+          example: "Antananarivo"
+        address_country:
+          type: string
+          example: "Madagascar"
+        address_postal_code:
+          type: string
+          pattern: '^\d+$'
+          example: "101"
+      required:
+        - address_street
+        - address_city
+        - address_country
+        - address_postal_code
+
+    Preferences:
+      type: object
+      properties:
+        needs_newsletter:
+          type: boolean
+          example: true
+        language:
+          type: string
+          enum: ["mg", "fr", "eng"]
+          example: "eng"
+      required:
+        - needs_newsletter
+        - language
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
